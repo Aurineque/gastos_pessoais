@@ -4,33 +4,51 @@ import 'package:intl/intl.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
+  final void Function(String) onRemove;
 
-  const TransactionList(this.transactions, {Key? key}) : super(key: key);
+  const TransactionList(this.transactions, this.onRemove, {Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 300,
-      child: ListView.builder(
-        itemCount: transactions.length,
-        itemBuilder: (context, index) {
-          final tr = transactions[index];
-          return Card(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    color: Colors.blue,
-                    padding: const EdgeInsets.all(15),
-                    child: Text(
-                      'R\$ ' + tr.value.toStringAsFixed(2),
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 15),
+    return transactions.isEmpty
+        ? Column(
+            children: [
+              const SizedBox(height: 20),
+              Text('Nenhuma transação cadastrada!',
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 20),
+              SizedBox(
+                height: 200,
+                child: Image.asset(
+                  'assets/images/waiting.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
+          )
+        : ListView.builder(
+            itemCount: transactions.length,
+            itemBuilder: (context, index) {
+              final tr = transactions[index];
+              return Card(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue,
+                    radius: 30,
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: FittedBox(
+                        child: Text(
+                          'R\$${tr.value}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                  Column(
+                  title: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
@@ -42,16 +60,19 @@ class TransactionList extends StatelessWidget {
                           tr.category,
                           style: const TextStyle(color: Colors.grey),
                         ),
+                        Text(
+                          DateFormat('d MMM y').format(tr.date),
+                          style: const TextStyle(color: Colors.grey),
+                        ),
                       ]),
-                  Text(
-                    DateFormat('d MMM y').format(tr.date),
-                    style: const TextStyle(color: Colors.grey),
-                    textAlign: TextAlign.end,
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    color: Colors.red,
+                    onPressed: () => onRemove(tr.id),
                   ),
-                ]),
+                ),
+              );
+            },
           );
-        },
-      ),
-    );
   }
 }
